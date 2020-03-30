@@ -1,0 +1,8 @@
+# Project exclude paths
+/.gradle/
+/common/out/
+/common/out/production/classes/
+/datagenerator/out/
+/datagenerator/out/production/classes/
+/flinkprocessor/out/
+/flinkprocessor/out/production/classes/

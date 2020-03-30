@@ -1,0 +1,68 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.3'
+}
+
+apply plugin: "java"
+apply plugin: "application"
+apply plugin: "com.github.johnrengelman.shadow"
+
+group = "com.dellemc.desdp.demo"
+version = 1.0
+
+mainClassName = "com.dellemc.desdp.demo.SongPlayGeneratorCli"
+archivesBaseName = 'pravega-music-demo'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven {
+        url "https://oss.jfrog.org/jfrog-dependencies"
+    }
+}
+
+dependencies {
+    compile "io.pravega:pravega-client:${pravegaVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jApiVersion}"
+    compile "commons-cli:commons-cli:1.4"
+    if (includePravegaCredentials.toBoolean()) {
+        compile "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
+    }
+    runtime "ch.qos.logback:logback-classic:1.2.3"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
+    testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
+}
+
+shadowJar {
+    zip64 true
+}
+
+test {
+    useJUnitPlatform()
+    systemProperties 'singlenode.configurationFile': project.file('src/test/resources/standalone-config.properties')
+}
+
+
+
+
+/*
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "commons-cli:commons-cli:1.4"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+*/

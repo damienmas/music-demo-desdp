@@ -1,0 +1,6 @@
+rootProject.name = 'music-demo-desdp'
+include 'flinkprocessor'
+include 'datagenerator'
+include 'common'
+include 'com.dellemc.desdp.demo'
+
