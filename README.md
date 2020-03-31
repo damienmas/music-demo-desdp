@@ -35,3 +35,7 @@ usage: SongPlayGenerator [-c <controller-uri>] [-h] [-k] [--max-xput
 
 (You can generate these instructions by running the jar with the `-h` or `--help` option) 
 
+
+# References
+https://github.com/twincitiesguy/pravega-music-demo
+
