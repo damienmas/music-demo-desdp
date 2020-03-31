@@ -9,13 +9,14 @@
  *
  */
 plugins {
-    id 'com.github.johnrengelman.shadow' version '2.0.3'
+    id 'com.github.johnrengelman.shadow' version '4.0.3'
 }
 
 apply plugin: "java"
 apply plugin: "maven"
 apply plugin: "application"
 apply plugin: "maven-publish"
+apply plugin: "com.github.johnrengelman.shadow"
 
 group = "com.dellemc.desdp.demo"
 version = samplesVersion
@@ -61,7 +62,7 @@ dependencies {
 //    compile "net.logstash.logback:logstash-logback-encoder:${logstashLogbackEncoderVersion}"
 //    compile "com.github.vladimir-bukhtoyarov:bucket4j-core:${bucket4jVersion}"
 
-    testCompile "org.apache.flink:flink-test-utils_${flinkScalaVersion}:${flinkVersion}"
+//    testCompile "org.apache.flink:flink-test-utils_${flinkScalaVersion}:${flinkVersion}"
 //    testCompile "junit:junit:${junitVersion}"
 }
 shadowJar {
@@ -87,7 +88,23 @@ distributions {
     }
 }
 
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username userName
+                password passWord
+            }
+            url projectRepoUrl
+        }
+    }
 
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+}
 
 /*
 plugins {

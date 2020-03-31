@@ -7,7 +7,7 @@ apply plugin: "application"
 apply plugin: "com.github.johnrengelman.shadow"
 
 group = "com.dellemc.desdp.demo"
-version = 1.0
+version = samplesVersion
 
 mainClassName = "com.dellemc.desdp.demo.SongPlayGeneratorCli"
 archivesBaseName = 'pravega-music-demo'

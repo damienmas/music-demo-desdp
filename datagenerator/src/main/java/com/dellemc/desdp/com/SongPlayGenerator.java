@@ -101,9 +101,9 @@ public class SongPlayGenerator implements Runnable {
                 // use the player ID as the routing key (guarantees order for each player)
                 String playerId = generatePlayerId();
                 String message = generatePlayMessage(playerId);
-                log.info("Writing message (key: {}, message: {}) to stream {} / {}",
-                        playerId, message, config.getScope(), config.getStream());
                 writer.writeEvent(playerId, message);
+                log.info("Message Written (key: {}, message: {}) to stream {} / {}",
+                        playerId, message, config.getScope(), config.getStream());
                 verifyXput();
                 throttle();
             }
