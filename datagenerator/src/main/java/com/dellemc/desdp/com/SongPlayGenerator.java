@@ -135,7 +135,7 @@ public class SongPlayGenerator implements Runnable {
 
             // create the stream
             StreamConfiguration streamConfiguration = StreamConfiguration.builder()
-                    .scalingPolicy(ScalingPolicy.byEventRate(6, 2, 1))
+                    .scalingPolicy(ScalingPolicy.byEventRate(1000, 2, 1))
                     .build();
             streamManager.createStream(config.getScope(), config.getStream(), streamConfiguration);
         }
@@ -154,7 +154,11 @@ public class SongPlayGenerator implements Runnable {
 
         // get the artist
         String artist = getArtistMap().get(song);
+
+        long timestamp = System.currentTimeMillis();
+
         return "{" +
+                "\"timestamp\": \"" + timestamp + "\"," +
                 "\"playerId\": \"" + playerId + "\"," +
                 "\"song\": \"" + song + "\"," +
                 "\"artist\": \"" + artist + "\"" +

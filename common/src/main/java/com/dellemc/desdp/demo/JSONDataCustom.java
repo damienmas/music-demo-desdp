@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JSONDataCustom implements Serializable {
+    public long timestamp;
     public String playerId;
     public String song;
     public String artist;
@@ -13,7 +14,8 @@ public class JSONDataCustom implements Serializable {
     @Override
     public String toString() {
         return "{" +
-                "playerId='" + playerId + '\'' +
+                "timestamp='" + timestamp + '\'' +
+                ", playerId='" + playerId + '\'' +
                 ", song='" + song + '\'' +
                 ", artist='" + artist + '\'' +
                 '}';

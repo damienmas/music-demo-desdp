@@ -53,17 +53,9 @@ dependencies {
     if (includePravegaCredentials.toBoolean()) {
         compile "io.pravega:pravega-keycloak-client:${pravegaCredentialsVersion}"
     }
-//    compile "org.apache.flink:flink-streaming-scala_${flinkScalaVersion}:${flinkVersion}"
-//    compile "org.apache.flink:flink-ml_${flinkScalaVersion}:${flinkVersion}"
-//    compile "org.apache.flink:flink-table_${flinkScalaVersion}:${flinkVersion}"
-//    compile "org.apache.flink:flink-json:${flinkVersion}"
+    compile "org.apache.flink:flink-connector-elasticsearch6_${flinkScalaVersion}:${flinkVersion}"
+    compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:6.5.4"
     compile "ch.qos.logback:logback-classic:${logbackVersion}"
-//    compile "ch.qos.logback:logback-core:${logbackVersion}"
-//    compile "net.logstash.logback:logstash-logback-encoder:${logstashLogbackEncoderVersion}"
-//    compile "com.github.vladimir-bukhtoyarov:bucket4j-core:${bucket4jVersion}"
-
-//    testCompile "org.apache.flink:flink-test-utils_${flinkScalaVersion}:${flinkVersion}"
-//    testCompile "junit:junit:${junitVersion}"
 }
 shadowJar {
     dependencies {

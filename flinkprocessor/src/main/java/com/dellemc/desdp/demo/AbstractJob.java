@@ -14,15 +14,28 @@ import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.Stream;
 import io.pravega.client.stream.StreamConfiguration;
+import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkFunction;
+import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
+import org.apache.flink.streaming.connectors.elasticsearch6.ElasticsearchSink;
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An abstract job class for Flink Pravega applications.
@@ -103,5 +116,28 @@ public abstract class AbstractJob implements Runnable {
         }
         log.info("Parallelism={}", env.getParallelism());
         return env;
+    }
+
+    protected void setupElasticSearch() throws Exception {
+        if (config.getElasticSearch().isSinkResults()) {
+            new ElasticSetup(config.getElasticSearch()).run();
+        }
+    }
+
+    protected ElasticsearchSinkFunction getResultSinkFunction() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected ElasticsearchSink newElasticSearchSink() throws Exception {
+        String host = config.getElasticSearch().getHost();
+        int port = config.getElasticSearch().getPort();
+
+        List<HttpHost> httpHosts = new ArrayList<>();
+        httpHosts.add(new HttpHost(host, port, "http"));
+
+        ElasticsearchSink.Builder builder = new ElasticsearchSink.Builder<>(httpHosts, getResultSinkFunction());
+        builder.setBulkFlushInterval(0);
+        return builder.build();
+
     }
 }

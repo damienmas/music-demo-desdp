@@ -1,0 +1,58 @@
+mavenCoordinate:
+  group: com.dellemc.desdp.demo
+  artifact: flinkprocessor
+  version: 0.1
+
+# Chart should ONLY deploy the application and not all resources
+onlyApplication: false
+
+# Number of Projects to be created
+projects: 1
+
+# Number of Flink Clusters per project to be created
+clusters: 1
+
+# Number of Applications to be deployed per project
+applications: 1
+
+flinkVersion: 1.9.0
+
+flink:
+  applications:
+    switch:
+      musicReader: true
+
+# Detailed Project Control
+project:
+  zookeeperReplicas: 3
+  mavenStorage: 20Gi
+  localStorage: 20Gi
+
+# Detailed FlinkCluster Control
+cluster:
+  localStorage: 20Gi
+  taskManager:
+    replicas: 1
+    memory: 1024M
+    cpu: 500m
+    taskSlots: 1
+
+# Detailed FlinkApplication Control
+application:
+  mavenVersion: "1.0"
+  defaultParallelism: 1
+
+  pravega:
+    pravega_stream: music1
+#    pravega_standalone: false
+    pravega_controller: "tls://pravega-controller.demo.desdp-lab.com:443"
+    # Controls Created Streams
+#    streamSegments: 3
+  elastic_search:
+    elastic_host: es-client.esearch.demo.desdp-lab.com
+    elastic_port: 80
+    elastic_delete_index: true
+
+  reader:
+    # How many readers
+    parallelism: 1

@@ -1,0 +1,38 @@
+{{- if .Values.flink.applications.switch.musicReader }}
+{{- $flinkVersion := .Values.flinkVersion -}}
+{{- $application := .Values.application -}}
+apiVersion: flink.nautilus.dellemc.com/v1beta1
+kind: "FlinkApplication"
+metadata:
+  name: "music-reader-app"
+spec:
+  flinkVersion: {{ $flinkVersion }}
+  clusterSelector:
+    name: music-reader
+  mavenCoordinate: {{ .Values.mavenCoordinate.group }}:{{ .Values.mavenCoordinate.artifact }}:{{ .Values.mavenCoordinate.version }}
+  mainClass: com.dellemc.desdp.demo.SongPlayReaderJob
+
+  parallelism: {{ $application.defaultParallelism }}
+
+  state: started
+
+  parameters:
+    - name: scope
+      value: {{ $.Release.Namespace | quote }}
+
+    - name: input-stream
+      value: {{ $application.pravega.pravega_stream | quote }}
+
+    - name: controller
+      value:  {{ $application.pravega.pravega_controller | quote }}
+
+    - name: elastic-host
+      value:  {{ $application.elastic_search.elastic_host | quote }}
+
+    - name: elasticsearch-client
+      value:  {{ $application.elastic_search.elastic_port | quote }}
+
+    - name: elastic-delete-index
+      value:  {{ $application.elastic_search.elastic_delete_index | quote }}
+
+  {{- end }}

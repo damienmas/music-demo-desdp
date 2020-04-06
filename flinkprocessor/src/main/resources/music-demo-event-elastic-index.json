@@ -1,0 +1,15 @@
+{
+  "@@type@@": {
+    "properties": {
+      "Timestamp": {
+        "type": "date"
+      },
+      "Artist": {
+        "type": "keyword"
+      },
+      "Count": {
+        "type": "float"
+      }
+    }
+  }
+}
