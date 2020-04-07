@@ -6,6 +6,7 @@ import io.pravega.connectors.flink.FlinkPravegaReader;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -64,8 +65,8 @@ public class SongPlayReaderJob extends AbstractJob {
         try {
             final String jobName = SongPlayReaderJob.class.getName();
             StreamExecutionEnvironment env = initializeFlinkStreaming();
-            //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-            //setupElasticSearch();
+            env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            setupElasticSearch();
             createStream(getConfig().getInputStreamConfig());
             //createStream(getConfig().getOutputStreamConfig());
 
@@ -92,13 +93,19 @@ public class SongPlayReaderJob extends AbstractJob {
                     .map(new RowSplitter())
                     .flatMap(new ArtistCount())
                     .keyBy(1)
-                    .sum(2);
+                    .reduce(new ReduceFunction<Tuple3<Long, String,Integer>>() {
+                        @Override
+                        public Tuple3<Long, String, Integer> reduce(Tuple3<Long, String, Integer> value1, Tuple3<Long, String, Integer> value2) throws Exception {
+                            return new Tuple3<Long, String, Integer>(value2.f0, value2.f1, value1.f2 + value2.f2);
+                        }
+                    });
+                    //.sum(2);
 
             //events.printToErr();
             events.print();
 
-            //ElasticsearchSink<Tuple3<Long, String, Integer>> elasticSink = newElasticSearchSink();
-            //events.addSink(elasticSink).name("Write to ElasticSearch");
+            ElasticsearchSink<Tuple3<Long, String, Integer>> elasticSink = newElasticSearchSink();
+            events.addSink(elasticSink).name("Write to ElasticSearch");
 
             log.info("Executing {} job", jobName);
             env.execute(jobName);

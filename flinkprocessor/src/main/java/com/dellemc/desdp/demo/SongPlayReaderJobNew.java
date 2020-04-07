@@ -5,11 +5,15 @@ import io.pravega.client.stream.StreamCut;
 import io.pravega.connectors.flink.FlinkPravegaReader;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.functions.RuntimeContext;
+import org.apache.flink.api.java.aggregation.SumAggregationFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.watermark.Watermark;
@@ -74,25 +78,37 @@ public class SongPlayReaderJobNew extends AbstractJob {
             // No Transformation, simply read the Stream
             DataStream<Tuple3<Long, String, Integer>> events = env
                     .addSource(flinkPravegaReader)
-                    .name("events").assignTimestampsAndWatermarks(new AscendingTimestampExtractor<MusicDemo>() {
-                        private long currentMaxTimestamp;
+                    .name("events")/*.assignTimestampsAndWatermarks(new AscendingTimestampExtractor<MusicDemo>() {
                         @Override
                         public long extractAscendingTimestamp(MusicDemo element) {
-                            currentMaxTimestamp = element.timestamp;
                             return element.timestamp;
                         }
-
-                        @Nullable
-                        @Override
-                        public Watermark getCurrentWatermark() {
-                            // return the watermark as current highest timestamp minus the out-of-orderness bound
-                            return new Watermark(currentMaxTimestamp);
-                        }
-                    })
+                    })*/
                     .map(new RowSplitter())
                     .flatMap(new ArtistCount())
                     .keyBy(1)
-                    .sum(2);
+                    .reduce(new ReduceFunction<Tuple3<Long, String,Integer>>() {
+                        //private Integer count = 1;
+                        @Override
+                        public Tuple3<Long, String, Integer> reduce(Tuple3<Long, String, Integer> value1, Tuple3<Long, String, Integer> value2) throws Exception {
+                            return new Tuple3<Long, String, Integer>(value2.f0, value2.f1, value1.f2 + value2.f2);
+                        }
+                    });
+                    //.sum(new SumArtist());
+                    //.sum(2);
+/*
+                    .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<MusicDemo>() {
+                        //private long currentMaxTimestamp;
+
+                        @Override
+                        public long extractAscendingTimestamp(MusicDemo element) {
+                            //currentMaxTimestamp = element.timestamp;
+                            return element.timestamp;
+                        }
+                    })
+*/
+
+
 
 
 
@@ -108,8 +124,8 @@ public class SongPlayReaderJobNew extends AbstractJob {
             //events.printToErr();
             events.print();
 
-            //ElasticsearchSink<Tuple3<Long, String, Integer>> elasticSink = newElasticSearchSink();
-            //events.addSink(elasticSink).name("Write to ElasticSearch");
+            ElasticsearchSink<Tuple3<Long, String, Integer>> elasticSink = newElasticSearchSink();
+            events.addSink(elasticSink).name("Write to ElasticSearch");
 
             log.info("Executing {} job", jobName);
             env.execute(jobName);
@@ -119,6 +135,7 @@ public class SongPlayReaderJobNew extends AbstractJob {
         }
     }
 
+    //public static class SumArtist implements SumAggregationFunction<Tuple3>{}
     public static class RowSplitter implements
             MapFunction<MusicDemo, Tuple4<Long, String, String, String>> {
 
